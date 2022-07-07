@@ -7,7 +7,8 @@ Fork of [Ryan Butler](https://github.com/ryancbutler/Citrix-VAD-LAB) github, how
     - Build.sh - Change directory to project location
     - Destroy.sh - Change directory to project location
   - Terraform
-    - Labtf.vars
+    - Lab.tfvars.sample
+      - Edit all the variables AND RENAME to lab.tfvars
   - Ansible
     - Vars.yml
     - Roles
