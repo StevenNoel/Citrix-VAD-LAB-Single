@@ -123,7 +123,7 @@ DS_WriteLog "I" "Define the variables needed in this script:" $LogFile
 # CUSTOMIZE THE FOLLOWING VARIABLES TO YOUR REQUIREMENTS
 # -----------------------------------
 # $SiteName = "MyTestSite"                                                      # The name of your XenDesktop site. For example: "MySite".
-# $DatabaseServer = ""SQLServer1.mycompany.com"                                           # The name of your SQL server or SQL server instance (e.g. "SQLServer1.mycompany.com" or "SQLCTX01.mycompany.com\InStance1").
+$DatabaseServer = "$env:computername\sqlexpress"                                           # The name of your SQL server or SQL server instance (e.g. "SQLServer1.mycompany.com" or "SQLCTX01.mycompany.com\InStance1").
 # $DatabaseServerPort = "1433"                                              # The SQL port number (1433 by default)
 # $DatabaseName_Site = "CTX_Site_DB"                                        # The name for the site database. For example: "CTX_Site_DB".
 # $DatabaseName_Logging = "CTX_Logging_DB"                                  # The name for the logging database. For example: "CTX_Logging_DB".
@@ -139,7 +139,9 @@ DS_WriteLog "I" "Define the variables needed in this script:" $LogFile
 # $GroomingDays = 365                                                       # The number of days you want to monitoring data to be saved in the database, for example 365 days.
 
 $SiteName = $env:SiteName
-$DatabaseServer = $env:DatabaseServer
+Write-host $SiteName
+
+#$DatabaseServer = $env:DatabaseServer
 $DatabaseServerPort = $env:DatabaseServerPort
 $DatabaseName_Site = $env:DatabaseName_Site
 $DatabaseName_Logging = $env:DatabaseName_Logging
@@ -149,7 +151,7 @@ $LicenseServerPort = $env:LicenseServerPort
 $LicensingModel = $env:LicensingModel
 $ProductCode = $env:ProductCode
 $ProductEdition = $env:ProductEdition
-$AdminGroup = $env:AdminGroup 
+$AdminGroup = "$env:Userdomain\domain admins"
 $Role = $env:Role
 $Scope = $env:Scope
 $GroomingDays = $env:GroomingDays
@@ -262,6 +264,7 @@ DS_WriteLog "-" "" $LogFile
 # Check if the XenDesktop site is configured and retrieve the site version number
 DS_WriteLog "I" "Check if the XenDesktop site is configured and retrieve the site version number" $LogFile
 $SiteExists = $False
+<#
 try {
     $SQL_ConnectionString = "Server=$DatabaseServer,$DatabaseServerPort;Database=$DatabaseName_Site;Integrated Security=True;"
     $SQL_Connection = New-Object System.Data.SqlClient.SqlConnection
@@ -288,9 +291,11 @@ try {
     DS_WriteLog "E" "An error occurred trying to retrieve the site and site version (error: $($Error[0]))" $LogFile
     Exit 1
 }
+#>
 
 DS_WriteLog "-" "" $LogFile
 
+<#
 # Create a new site, or if the site exists, compare the site version to the version of the XenDesktop product software installed on the local server and join the local server to the site
 if ( $SiteExists ) {
     DS_WriteLog "I" "Compare the site version to the version of the XenDesktop product software installed on the local server and join the local server to the site" $LogFile
@@ -353,6 +358,8 @@ if ( $SiteExists ) {
         Exit 1
     }
 } else {
+
+#>
     # CREATE SITE
     # -----------
     DS_WriteLog "I" "Create the XenDesktop site '$SiteName'" $LogFile
@@ -493,7 +500,7 @@ if ( $SiteExists ) {
         DS_WriteLog "E" "An error occurred trying to disable the Customer Experience Improvement Program (CEIP) (error: $($Error[0]))" $LogFile
         Exit 1
     }
-}
+
 
 # Enable File Security  
 Remove-Item env:\SEE_MASK_NOZONECHECKS

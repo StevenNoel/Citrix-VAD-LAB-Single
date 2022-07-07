@@ -1,0 +1,73 @@
+---
+- name: Create Log Folder
+  win_file:
+    path: C:\Logs
+    state: directory
+
+- name: Disable Domain firewall
+  win_firewall:
+    state: disabled
+    profiles:
+    - Domain
+
+- name: Enable RDP
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server
+    name: 'fDenyTSConnections'
+    data: '0'
+    type: dword
+
+- name: Enable RDP Firewall Rules
+  win_firewall_rule:
+    name: "Remote Desktop (Created by Ansible)"
+    localport: 3389
+    action: allow
+    protocol: tcp
+    direction: in
+    state: present
+    enabled: yes
+    profiles: 'domain,public,private'
+
+- name: Install DDC Pre-Reqs
+  win_feature:
+    name:
+    - GPMC
+    - RSAT-ADDS-Tools
+    - RDS-Licensing-UI
+    - WAS
+    - Telnet-Client
+    - Remote-Assistance
+    state: present
+  register: win_feature
+  
+- name: "Reboot after pre req features"
+  win_reboot:
+
+- name: "Install c++ redistribs"
+  win_package:
+    path: "{{ citrix_path }}\\Support\\VcRedist\\VC_redist.x64.exe"
+    arguments: /install /passive /norestart
+    product_id: none
+
+- name: "Install c++ redistribs 2"
+  win_package:
+    path: "{{ citrix_path }}\\Support\\VcRedist\\VC_redist.x86.exe"
+    arguments: /install /passive /norestart
+    product_id: none
+
+- name: "Install dotnet 4.8"
+  win_package:
+    path: "{{ citrix_path }}\\Support\\DotNet48\\ndp48-x86-x64-allos-enu.exe"
+    arguments: /q /norestart
+    product_id: none
+
+- name: "Reboot after dotnet"
+  win_reboot:
+
+- name: Install SQL Management
+  win_chocolatey:
+    name: sql-server-management-studio
+    state: present
+      
+- name: Reboot after SQL
+  win_reboot:

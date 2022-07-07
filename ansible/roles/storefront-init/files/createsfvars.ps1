@@ -6,6 +6,8 @@ $outputObj = @{
     "GatewayUrl" = $env:GatewayUrl
     "GatewaySTAUrls"= $env:GatewaySTAUrls
     "GatewayName" = $env:GatewayName
+    "SSLCert" = $env:SSLCert
+    "CertPass" = $env:CertPass
 }
     
 $outputObj|Export-Clixml "C:\Logs\sf-vars.xml" -Force

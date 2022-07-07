@@ -5,12 +5,12 @@
       creates: C:\Logs\sitedone.txt
     environment:
       SiteName: "{{ SiteName }}"
-      DatabaseServer: "{{ hostvars[groups['sql.0'][0]]['ansible_fqdn'] }}"
+      DatabaseServer: "{{ hostvars[groups['all'][0]]['ansible_fqdn'] }}"
       DatabaseServerPort: "{{ DatabaseServerPort }}"
       DatabaseName_Site: "{{ DatabaseName_Site }}"
       DatabaseName_Logging: "{{ DatabaseName_Logging }}"
       DatabaseName_Monitoring: "{{ DatabaseName_Monitoring }}"
-      LicenseServer: "{{ hostvars[groups['sql.0'][0]]['ansible_fqdn'] }}"
+      LicenseServer: "{{ hostvars[groups['all'][0]]['ansible_fqdn'] }}"
       LicenseServerPort: "{{ LicenseServerPort }}"
       LicensingModel: "{{ LicensingModel }}"                  
       ProductCode: "{{ ProductCode }}"                                   
@@ -19,3 +19,6 @@
       Role:  "{{ Role }}"
       Scope: "{{ Scope }}"                                 
       GroomingDays: "{{ GroomingDays }}"
+
+  - name: Reboot after Create Site
+    win_reboot:

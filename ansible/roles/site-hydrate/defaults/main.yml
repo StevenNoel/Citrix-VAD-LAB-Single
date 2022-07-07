@@ -1,3 +1,20 @@
+#Functional Level
+cvad_funclevel: L7_30 #2106 (newest)
+
+#Multi Session
 cvad_machinecatalog: Windows Stand Alone
 cvad_deliverygroup: Windows Lab
 cvad_desktop: Windows Lab Stand Alone
+vdahostname: $env:computername.$env:userdnsdomain #ctx-viab-01.constoso.local
+
+#Single Session
+cvad_singlemc: DesktopOS-MC
+cvad_singledg: DesktopOS-DG
+cvad_singledesktop: Desktop
+cvad_singlevda: DOMAIN\WIN10  #contoso\Computer1
+cvad_singleusername: USERNAME #bob.smith
+
+#vCenter
+cvad_vcenterurl: https://VCENTER-SERVER-FQDN #https://vcenter.domain.local
+cvad_vcenteruser: DOMAIN\USERNAME #contoso\adminbob
+cvad_vcenterpass: SUPERSECRETPASSWORD

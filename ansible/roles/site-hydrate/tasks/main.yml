@@ -1,10 +1,30 @@
 ---
+- name: Hosting Connection
+  script: hostingconnection.ps1
+  args:
+    creates: C:\Logs\done-citrixhostingconnection.txt
+  environment:
+    vdahostname: "{{ hostvars[groups['all'][0]]['ansible_hostname'] }}"
+    cvad_vcenterurl: "{{ cvad_vcenterurl }}"
+    cvad_vcenteruser: "{{ cvad_vcenteruser }}"
+    cvad_vcenterpass: "{{ cvad_vcenterpass }}"
+
+# Pause for 1 minute to fix "Hypervisor conenction is not ready" issue.
+- pause:
+    minutes: 1
+
 - name: Hydrate Site
   script: hydrate.ps1
   args:
     creates: C:\Logs\done-hydrate.txt
   environment:
-    vdahostname: "{{ hostvars[groups['vda'][0]]['ansible_hostname'] }}"
+    vdahostname: "{{ hostvars[groups['all'][0]]['ansible_hostname'] }}"
     cvad_machinecatalog: "{{ cvad_machinecatalog }}"
     cvad_deliverygroup: "{{ cvad_deliverygroup }}"
     cvad_desktop: "{{ cvad_desktop }}"
+    cvad_singledesktop: "{{ hostvars[groups['all'][0]]['ansible_hostname'] }}"
+    cvad_singlemc: "{{ cvad_singlemc }}"
+    cvad_singledg: "{{ cvad_singledg }}"
+    cvad_singlevda: "{{ cvad_singlevda }}"
+    cvad_singleusername: "{{ cvad_singleusername }}"
+    cvad_funclevel: "{{ cvad_funclevel }}"

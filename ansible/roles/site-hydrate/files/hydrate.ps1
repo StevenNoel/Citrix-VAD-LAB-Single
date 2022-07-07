@@ -1,25 +1,73 @@
+Start-Transcript -Path "C:\Logs\HydrateSite-Transcript.txt" -Verbose
+
+Add-PSSnapIn citrix*
+
+$funclevel = $env:cvad_funclevel
+
 $mcname = $env:cvad_machinecatalog
 $dgname = $env:cvad_deliverygroup
 $desktopname = $env:cvad_desktop
 
-#New Machine Catalog
-$catalog = New-BrokerCatalog -AllocationType "Random" -IsRemotePC $False -MachinesArePhysical $True -MinimumFunctionalLevel "L7_20" -Name $mcname -PersistUserChanges "OnLocal" -ProvisioningType "Manual" -Scope @() -SessionSupport "MultiSession"
+$mcname2 = $env:cvad_singlemc
+$dgname2 = $env:cvad_singledg
+$desktopname2 = $env:cvad_singledesktop
 
-#Add Machine to MC
+$username = $env:cvad_singleusername
+$usernameSid = (New-Object System.Security.Principal.NTAccount($username)).Translate([System.Security.Principal.SecurityIdentifier]).value
+Write-Warning "Username SID $usernameSID" -verbose
+
+$singlevda2 = $env:cvad_singlevda
+$Singlevda2name = $singlevda2.Split("\")[1]
+$Singlevda2sid = (dsquery * -Filter "(name=$singlevda2name)" -attr objectSID)[1]
+$Singlevda2sid = $Singlevda2sid.trim()
+Write-Warning "Machine SID $Singlevda2sid" -Verbose
+
+#New Machine Catalog MultiSession
+Write-Warning "DG Multi Session Add MC"
+$catalog = New-BrokerCatalog -AllocationType "Random" -IsRemotePC $False -MachinesArePhysical $True -MinimumFunctionalLevel $funclevel -Name $mcname -PersistUserChanges "OnLocal" -ProvisioningType "Manual" -Scope @() -SessionSupport "MultiSession"
+
+#New Machine Catalog SingleSession
+Write-Warning "DG Single Session Add MC"
+$catalog2 = New-BrokerCatalog -AllocationType "Static" -IsRemotePC $False -MachinesArePhysical $False -MinimumFunctionalLevel $funclevel -Name $mcname2 -PersistUserChanges "OnLocal" -ProvisioningType "Manual" -Scope @() -SessionSupport "SingleSession"
+
+
+#Add Machine to MC MultiSession
 $vda = New-BrokerMachine -CatalogUid $catalog.uid -IsReserved $False -MachineName $env:vdahostname
 
-#Delivery Group
-$dg = New-BrokerDesktopGroup -ColorDepth "TwentyFourBit" -DeliveryType "DesktopsAndApps" -DesktopKind "Shared" -InMaintenanceMode $False -IsRemotePC $False -MinimumFunctionalLevel "L7_20" -Name $dgname -OffPeakBufferSizePercent 10 -PeakBufferSizePercent 10 -PublishedName $dgname -Scope @() -SecureIcaRequired $False -SessionSupport "MultiSession" -ShutdownDesktopsAfterUse $False -TimeZone "Central Standard Time"
+#Add Machine to MC SingleSession - uncomment if you have a standalone desktop OS machine
+#$hostedmachinename =  (Get-ChildItem -Path XdHyp:\ -force -recurse | Where-Object {$_.name -eq $Singlevda2name} | Select-Object -First 1).id
+#$hypervisorconnectionUID = ((Get-BrokerHypervisorConnection | Select-Object UID).UID)
+#$vda2 = New-BrokerMachine -CatalogUid $catalog2.uid -IsReserved $False -MachineName $singlevda2sid -HostedMachineID $hostedmachinename -HypervisorConnectionUid $hypervisorconnectionUID
+#Add-BrokerUser -InputObject @($usernamesid) -Machine $vda2.Uid
+
+#Delivery Group MultiSession
+Write-Warning "DG Multi Session Add DG"
+$dg = New-BrokerDesktopGroup -ColorDepth "TwentyFourBit" -DeliveryType "DesktopsAndApps" -DesktopKind "Shared" -InMaintenanceMode $False -IsRemotePC $False -MinimumFunctionalLevel $funclevel -Name $dgname -OffPeakBufferSizePercent 10 -PeakBufferSizePercent 10 -PublishedName $dgname -Scope @() -SecureIcaRequired $False -SessionSupport "MultiSession" -ShutdownDesktopsAfterUse $False -TimeZone "Central Standard Time"
 Set-BrokerDesktopGroup -InputObject @($dg.uid) -PassThru -ZonePreferences @("ApplicationHome","UserHome","UserLocation")
 
-#Add Machine to DG
+#Delivery Group SingleSession (feel free to uncomment)
+Write-Warning "DG Single Session Add DG"
+$dg2 = New-BrokerDesktopGroup -ColorDepth "TwentyFourBit" -DeliveryType "DesktopsOnly" -DesktopKind "Private" -InMaintenanceMode $False -IsRemotePC $False -MinimumFunctionalLevel $funclevel -Name $dgname2 -OffPeakBufferSizePercent 10 -PeakBufferSizePercent 10 -PublishedName $dgname2 -Scope @() -SecureIcaRequired $False -SessionSupport "SingleSession" -ShutdownDesktopsAfterUse $False -TimeZone "Central Standard Time"
+
+#Add Machine to DG MultiSession
 Add-BrokerMachine -DesktopGroup $dgname -InputObject @($vda.uid)
 
-#Delivery Group
+#Add Machine to DG SingleSession - uncomment if you have a standalone desktop OS machine
+#Add-BrokerMachine -DesktopGroup $dgname2 -InputObject @($vda2.uid)
+
+#Delivery Group MultiSession
+Write-Warning "DG Multi Session BrokerAccessPolicyRule"
 New-BrokerAppEntitlementPolicyRule -DesktopGroupUid $dg.uid -Enabled $True -IncludedUserFilterEnabled $False -Name $dgname
-New-BrokerAccessPolicyRule -AllowedConnections "NotViaAG" -AllowedProtocols @("HDX","RDP") -AllowedUsers "AnyAuthenticated" -AllowRestart $True -DesktopGroupUid $dg.uid -Enabled $True -IncludedSmartAccessFilterEnabled $True -IncludedUserFilterEnabled $True -IncludedUsers @() -Name "${$dgname}_Direct"
-New-BrokerAccessPolicyRule -AllowedConnections "ViaAG" -AllowedProtocols @("HDX","RDP") -AllowedUsers "AnyAuthenticated" -AllowRestart $True -DesktopGroupUid $dg.uid -Enabled $True -IncludedSmartAccessFilterEnabled $True -IncludedSmartAccessTags @() -IncludedUserFilterEnabled $True -IncludedUsers @() -Name "${$dgname}_AG"
-New-BrokerEntitlementPolicyRule  -Description "" -DesktopGroupUid $dg.uid -Enabled $True -IncludedUserFilterEnabled $False -IncludedUsers @() -Name $desktopname -PublishedName $desktopname 
+New-BrokerAccessPolicyRule -AllowedConnections "NotViaAG" -AllowedProtocols @("HDX","RDP") -AllowedUsers "AnyAuthenticated" -AllowRestart $True -DesktopGroupUid $dg.uid -Enabled $True -IncludedSmartAccessFilterEnabled $True -IncludedUserFilterEnabled $True -IncludedUsers @() -Name "Multi_Direct"
+New-BrokerAccessPolicyRule -AllowedConnections "ViaAG" -AllowedProtocols @("HDX","RDP") -AllowedUsers "AnyAuthenticated" -AllowRestart $True -DesktopGroupUid $dg.uid -Enabled $True -IncludedSmartAccessFilterEnabled $True -IncludedSmartAccessTags @() -IncludedUserFilterEnabled $True -IncludedUsers @() -Name "Multi_AG"
+New-BrokerEntitlementPolicyRule  -Description "" -DesktopGroupUid $dg.uid -Enabled $True -IncludedUserFilterEnabled $False -IncludedUsers @() -Name $desktopname -PublishedName $desktopname
+
+Start-Sleep -Seconds 30
+
+#Delivery Group SingleSession
+Write-Warning "DG Single Session BrokerAccessPolicyRule"
+New-BrokerAccessPolicyRule -AllowedConnections "NotViaAG" -AllowedProtocols @("HDX","RDP") -AllowedUsers "AnyAuthenticated" -AllowRestart $True -DesktopGroupUid $dg2.uid -Enabled $True -IncludedSmartAccessFilterEnabled $True -IncludedUserFilterEnabled $True -IncludedUsers @() -Name "Single_Direct"
+New-BrokerAccessPolicyRule -AllowedConnections "ViaAG" -AllowedProtocols @("HDX","RDP") -AllowedUsers "AnyAuthenticated" -AllowRestart $True -DesktopGroupUid $dg2.uid -Enabled $True -IncludedSmartAccessFilterEnabled $True -IncludedSmartAccessTags @() -IncludedUserFilterEnabled $True -IncludedUsers @() -Name "Single_AG"
 
 #ICONs
 
@@ -39,3 +87,7 @@ New-BrokerApplication -ApplicationType "HostedOnDesktop" -CommandLineArguments "
 New-BrokerApplication -ApplicationType "HostedOnDesktop" -CommandLineArguments "" -CommandLineExecutable "C:\Windows\system32\mspaint.exe" -CpuPriorityLevel "Normal" -DesktopGroup $dg.uid -Enabled $True -IconUid $painticon.uid -IgnoreUserHomeZone $False -MaxPerUserInstances 0 -MaxTotalInstances 0 -Name "Paint" -Priority 0 -PublishedName "Paint" -SecureCmdLineArgumentsEnabled $True -ShortcutAddedToDesktop $False -ShortcutAddedToStartMenu $False -UserFilterEnabled $False -Visible $True -WaitForPrinterCreation $False
 
 "complete"  >> c:\logs\done-hydrate.txt
+
+Write-warning "$(Get-variable | Select-object *)"
+
+Stop-transcript -verbose

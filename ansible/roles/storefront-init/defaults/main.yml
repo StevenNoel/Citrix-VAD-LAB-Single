@@ -1,7 +1,11 @@
-HostbaseUrl: http://mycitrixlab.mydomain.com
-FarmServers: "{{ hostvars[groups['ddc.0'][0]]['ansible_fqdn'] }},{{ hostvars[groups['ddc.1'][0]]['ansible_fqdn'] }}"
+FarmServers: "{{ hostvars[groups['all'][0]]['ansible_fqdn'] }}"
 StoreVirtualPath: /Citrix/Store
-TransportType: HTTP
-GatewayUrl: https://mycitrix.myexternal.com
-GatewaySTAUrls: http://{{ hostvars[groups['ddc.0'][0]]['ansible_fqdn'] }}/scripts/ctxa.dll,http://{{ hostvars[groups['ddc.1'][0]]['ansible_fqdn'] }}/scripts/ctxa.dll
+TransportType: HTTPS
+GatewaySTAUrls: https://{{ hostvars[groups['all'][0]]['ansible_fqdn'] }}
 GatewayName: NSG1
+#Storefront URL
+HostbaseUrl: https://INTERNAL-FQDN #https://storefront.contoso.local
+#Netscaler Gateway URL
+GatewayUrl: https://EXTERNAL-FQDN #https://citrix.contoso.com
+SSLCert: wild_contoso_com_exp3_14_2024.pfx #wildcard_contoso_com.pfx
+CertPass: SUPERSECRET #supersecretpass!

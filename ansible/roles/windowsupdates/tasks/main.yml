@@ -1,0 +1,32 @@
+---
+- name: Applying Windows Updates
+  win_updates:
+    category_names:
+      - CriticalUpdates
+      - DefinitionUpdates
+      - SecurityUpdates
+    reboot: yes
+    reboot_timeout: 3600
+    log_path: C:\WindowsUpdates.txt
+  register: win_update
+
+- name: Reboot if updates require
+  win_reboot:
+  when: win_update.changed
+
+- name: Applying Windows Updates 2
+  win_updates:
+    category_names:
+      - CriticalUpdates
+      - DefinitionUpdates
+      - SecurityUpdates
+      - ServicePacks
+      - UpdateRollups
+    reboot: yes
+    reboot_timeout: 3600
+    log_path: C:\WindowsUpdates.txt
+  register: win_update
+
+- name: Reboot if updates require
+  win_reboot:
+  when: win_update.changed

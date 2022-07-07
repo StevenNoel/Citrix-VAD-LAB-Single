@@ -50,9 +50,11 @@
     state: present
   register: win_feature
 
-- name: Reboot if features require
+- name: Reboot force
   win_reboot:
-  when: win_feature.reboot_required
+
+- name: Run powershell script to disable IE ESC for Administrators
+  script: "files/disable-IE-protected.ps1"
 
 - name: Create Log Folder
   win_file:
@@ -62,27 +64,27 @@
 - name: Install Storefront Components
   block:
     - win_package:
-        path: "{{ citrix_path }}\\x64\\XenDesktop Setup\\XenDesktopServerSetup.exe"
-        arguments: /components storefront /configure_firewall /noreboot /quiet /logpath C:\Logs
+        path: "{{ citrix_path }}\\x64\\Storefront\\CitrixStoreFront-x64.exe"
+        arguments: -silent
         state: present
         expected_return_code: [0, 3, 4, 3010]
         creates_path: C:\ProgramData\Citrix\Storefront Install
+        product_id: none
       register: sf_install
   rescue:
     - debug:
           msg: 'Going to reboot and try again'
     - win_reboot:
     - win_package:
-        path: "{{ citrix_path }}\\x64\\XenDesktop Setup\\XenDesktopServerSetup.exe"
-        arguments: /components storefront /configure_firewall /noreboot /quiet /logpath C:\Logs
+        path: "{{ citrix_path }}\\x64\\Storefront\\CitrixStoreFront-x64.exe"
+        arguments: -silent
         state: present
+        product_id: none
         expected_return_code: [0, 3, 4, 3010]
-        creates_path: C:\ProgramData\Citrix\Storefront Install
       register: sf_install
 
 - name: Reboot after Storefront
   win_reboot:
-  when: sf_install.changed
 
 
 

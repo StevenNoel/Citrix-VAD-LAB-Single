@@ -6,8 +6,8 @@
    - ddc
    - director
    - createsite
-   - site-hydrate
+   - site-hydrate #edit defaults\main.yml, 
    - storefront
-   - storefront-init
+   - storefront-init #edit defaults\main.yml, files\cert.pfx, 
    - SSLCert
    - vda

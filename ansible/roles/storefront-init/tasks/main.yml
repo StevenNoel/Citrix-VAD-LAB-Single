@@ -11,10 +11,21 @@
     GatewayUrl: "{{ GatewayUrl }}"
     GatewaySTAUrls: "{{ GatewaySTAUrls }}"
     GatewayName: "{{ GatewayName }}"
+    SSLCert: "{{ SSLCert }}"
+    CertPass: "{{ CertPass }}"
+
 - name: Copy a Storefront script file
   win_copy:
     src: createsfsite.ps1
     dest: C:\Windows\Temp\
+
+- name: Copy SSL Cert
+  args:
+    creates: C:\Windows\Temp\"{{ SSLCert }}"
+  win_copy:
+    src: "{{ SSLCert }}"
+    dest: C:\Windows\Temp\
+
 - name: Create task to run a PS script as SYSTEM service
   win_scheduled_task:
     name: Create SF Cluster
@@ -25,20 +36,18 @@
     username: SYSTEM
     run_level: highest
     state: present
+
 - name: Storefront folder stat
   win_stat:
     path: C:\inetpub\wwwroot\Citrix
   register: sf_info
+
 - name: Start Create task
   win_shell: Start-ScheduledTask -TaskName "Create SF Cluster"
-  when: sf_info.stat.exists == False
-- name: Wait for passcode file
-  win_wait_for:
-    path: C:\Logs\passcode.txt
-    delay: 10
-  when: sf_info.stat.exists == False
-- name: Slurp passcode file
-  slurp:
-    src: C:\Logs\passcode.txt
-  register: passcode
-- debug: msg="{{ passcode['content'] | b64decode | trim }}"
+
+- name: Pause for 7 minutes to create Storefront Store
+  pause:
+    minutes: 7
+
+- name: Reboot after Storefront config
+  win_reboot:

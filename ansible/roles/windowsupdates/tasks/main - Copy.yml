@@ -1,0 +1,51 @@
+---
+- name: Copy windowsupdates.ps1 locally
+  args:
+    creates: C:\windows\temp\windowsupdates.ps1
+  win_copy:
+    src: windowsupdates.ps1
+    dest: C:\Windows\Temp\
+
+- name: Applying Windows Updates
+  win_scheduled_task:
+    name: WindowsUpdates
+    username: SYSTEM
+    actions:
+    - path: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+      arguments: -ExecutionPolicy Unrestricted -File C:\Windows\Temp\windowsupdates.ps1
+    # Remove this action if the task shouldn't be deleted on completion
+    #- path: cmd.exe
+    #  arguments: /c schtasks.exe /Delete /TN "WindowsUpdates" /F
+    triggers:
+    - type: registration
+  tags: task
+
+- name: wait for file C:\Logs\windowsupdates-done.txt to exist before continuing
+  win_wait_for:
+    path: C:\Logs\windowsupdates-done.txt
+    timeout: 50000
+
+- name: delete C:\Logs\windowsupdates-done.txt
+  win_file:
+    path: C:\Logs\windowsupdates-done.txt
+    state: absent
+
+- name: Reboot after Windows Updates
+  win_reboot:
+
+- name: Start WindowsUpdates Task
+  win_shell: Start-ScheduledTask -TaskName "WindowsUpdates"
+
+- name: wait for file C:\Logs\windowsupdates-done.txt to exist before continuing
+  win_wait_for:
+    path: C:\Logs\windowsupdates-done.txt
+    timeout: 50000
+
+- name: remove scheduled task
+  win_scheduled_task:
+    name: WindowsUpdates
+    path: ''
+    state: absent
+
+- name: Reboot after Windows Updates
+  win_reboot:

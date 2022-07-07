@@ -1,0 +1,5 @@
+---
+- name: Add Cert Script
+  script: SSLCert.ps1
+  args:
+    creates: C:\Logs\SSLCert.txt
