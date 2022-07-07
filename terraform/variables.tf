@@ -22,7 +22,6 @@ variable "vsphere_rp" {
   description = "vsphere resource pool"
 }
 
-
 variable "vsphere_template" {
   description = "vsphere template or vm to clone"
 }
@@ -30,7 +29,6 @@ variable "vsphere_template" {
 variable "vsphere_network" {
   description = "vsphere network for deployed vms"
 }
-
 
 variable "domain_user" {
   description = "Domain Admin User"
@@ -44,26 +42,42 @@ variable "domain" {
   description = "Domain to join"
 }
 
-variable "vsphere_linkedclones" {
-  description = "Use linked clones to deploy"
+variable "ip_address" {
+  description = "IP Address"
 }
 
+variable "ip_gateway" {
+  description = "IP Address Gateway"
+}
 
-variable "vm_storefront" {
-  description = "Prefix for Storefront servers"
+variable "ip_subnet" {
+  description = "IP Address Subnet Mask"
+}
+
+variable "dns_servers" {
+  description = "IP Address Subnet Mask"
+}
+
+variable "vsphere_linkedclones" {
+  description = "Use linked clones to deploy"
 }
 
 variable "vm_ddc" {
   description = "Prefix for DDC servers"
 }
-variable "vm_sql" {
-  description = "Name for SQL and license server"
-}
-
-variable "vm_vda" {
-  description = "Prefix for VDA server"
-}
 
 variable "vsphere_timezone" {
   description = "TimeZone to use for deployed machines"
+}
+
+variable "vsphere_folder" {
+  description = "vcenter folder"
+}
+
+variable "vsphere_cpu" {
+  description = "Number of CPUs"
+}
+
+variable "vsphere_Memory" {
+  description = "Memory size in MB"
 }
