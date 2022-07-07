@@ -1,24 +1,3 @@
-# Citrix LAB Single Deployment
-Fork of [Ryan Butler](https://github.com/ryancbutler/Citrix-VAD-LAB) github, however this version just deploys a single server with all the roles (Director, Delivery Controller, Storefront, SQL, and VDA).
-
-# What to edit
-- Make Edits/Change Variables to the following files
-  - Root
-    - Build.sh - Change directory to project location
-    - Destroy.sh - Change directory to project location
-  - Terraform
-    - Lab.tfvars.sample
-      - Edit all the variables AND RENAME to lab.tfvars
-  - Ansible
-    - Vars.yml
-    - Roles
-        - Site-hydrate
-            - defaults\main.yml
-        - Storefront-init
-            - defaults\main.yml
-            - files\cert.pfx (drop ssl cert file here)
-
-
 # Citrix Virtual Apps and Desktop vCenter Lab Deploy
 Uses Terraform and Ansible to deploy a fully functional CVAD environment. Many of the scripts used are thanks to [Dennis Span](https://dennisspan.com) and his fantastic blog.
 

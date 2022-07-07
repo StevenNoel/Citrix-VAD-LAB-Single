@@ -1,4 +1,0 @@
-sql_svc_account: mydomain\sql_svc
-sql_svc_password: usevaultnothere
-sql_admins: mydomain\sqladmins
-sql_path: \\mynas\sql\

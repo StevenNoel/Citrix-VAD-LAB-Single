@@ -1,0 +1,26 @@
+ansible_connection: winrm
+ansible_winrm_transport: credssp
+#Domain account to connect VIA winrm. (Must be domain account with admin permissions)
+ansible_user: ADMIN@DOMAIN.LOCAL
+ansible_password: SUPERSECRETPASSWORD
+ansible_winrm_server_cert_validation: ignore
+ansible_port: 5985
+ansible_become: false
+
+#Media locations (do not include trailing \)
+citrix_path: \\FILESERVER.DOMAIN.LOCAL\share$\XD7\Citrix_Virtual_Apps_and_Desktops_7_2203
+sql_path: \\FILESERVER.DOMAIN.LOCAL\share$\Citrix_Virtual_Apps_and_Desktops_7_2203\Support\SQLExpress
+#Admin Group to add to CVAD site
+AdminGroup: DOMAIN\domain admins
+
+
+
+#SQL service account
+sql_svc_account: DOMAIN\USERNAME
+sql_svc_password: SUPERSECRETPASSWORD
+
+#SQL Admins
+sql_admins: DOMAIN\domain admins
+
+#Apply Windows Updates
+apply_win_updates: false
